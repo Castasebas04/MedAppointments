@@ -1,0 +1,38 @@
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS specialties (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS doctors (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    specialty_id INTEGER REFERENCES specialties(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS schedules (
+  id SERIAL PRIMARY KEY,
+  doctor_id INTEGER REFERENCES doctors(id),
+  day_of_week VARCHAR(20) NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS appointments (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  doctor_id INTEGER REFERENCES doctors(id),
+  date DATE NOT NULL,
+  time TIME NOT NULL,
+  status VARCHAR(20) DEFAULT 'scheduled',
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
