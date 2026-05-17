@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedAppointments - Mis Citas</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f0f4f8; }
+    header { background: #2c5282; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.5rem; }
+    header div { display: flex; align-items: center; gap: 1rem; }
+    .btn-outline { background: transparent; border: 1px solid white; color: white; padding: 0.4rem 1rem; border-radius: 4px; cursor: pointer; text-decoration: none; }
+    .main { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    h2 { color: #2c5282; margin-bottom: 1rem; }
+    .card { background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.25rem; color: #4a5568; font-size: 0.9rem; }
+    input, select, textarea { width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 1rem; }
+    textarea { height: 80px; resize: vertical; }
+    .btn-primary { width: 100%; padding: 0.75rem; background: #2c5282; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; }
+    .btn-primary:hover { background: #2a4a7f; }
+    .message { padding: 0.75rem; border-radius: 4px; margin-top: 1rem; display: none; }
+    .message.error { background: #fed7d7; color: #c53030; display: block; }
+    .message.success { background: #c6f6d5; color: #276749; display: block; }
+    .appointment-item { border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+    .appointment-info h4 { color: #2d3748; margin-bottom: 0.25rem; }
+    .appointment-info p { color: #718096; font-size: 0.9rem; }
+    .status { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+    .status.scheduled { background: #c6f6d5; color: #276749; }
+    .status.cancelled { background: #fed7d7; color: #c53030; }
+    .btn-cancel { padding: 0.4rem 0.75rem; background: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+    .btn-cancel:hover { background: #c53030; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MedAppointments</h1>
+    <div>
+      <a href="index.html" class="btn-outline">Ver doctores</a>
+      <button class="btn-outline" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- Formulario agendar cita -->
+    <div class="card">
+      <h2>Agendar cita</h2>
+      <div class="form-group">
+        <label>Doctor</label>
+        <select id="doctorSelect"></select>
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="appointmentDate">
+      </div>
+      <div class="form-group">
+        <label>Hora</label>
+        <input type="time" id="appointmentTime">
+      </div>
+      <div class="form-group">
+        <label>Notas (opcional)</label>
+        <textarea id="appointmentNotes" placeholder="Describe tu motivo de consulta..."></textarea>
+      </div>
+      <button class="btn-primary" onclick="bookAppointment()">Agendar cita</button>
+      <div id="bookMessage" class="message"></div>
+    </div>
+
+    <!-- Lista de citas -->
+    <div class="card">
+      <h2>Mis citas</h2>
+      <div id="appointmentsList"><p>Cargando citas...</p></div>
+    </div>
+
+  </div>
+
+  <script>
+    const API = 'http://localhost:3000';
+    const token = localStorage.getItem('token');
+
+    if (!token) window.location.href = 'login.html';
+
+    // Cargar doctores en el select
+    async function loadDoctors() {
+      const res = await fetch(`${API}/doctors`);
+      const doctors = await res.json();
+      const select = document.getElementById('doctorSelect');
+      doctors.forEach(d => {
+        const option = document.createElement('option');
+        option.value = d.id;
+        option.textContent = `${d.name} — ${d.specialty}`;
+        select.appendChild(option);
+      });
+
+      // Si viene de index.html con doctor preseleccionado
+      const selected = JSON.parse(localStorage.getItem('selectedDoctor') || 'null');
+      if (selected) {
+        select.value = selected.id;
+        localStorage.removeItem('selectedDoctor');
+      }
+    }
+
+    // Agendar cita
+    async function bookAppointment() {
+      const doctor_id = document.getElementById('doctorSelect').value;
+      const date = document.getElementById('appointmentDate').value;
+      const time = document.getElementById('appointmentTime').value;
+      const notes = document.getElementById('appointmentNotes').value;
+
+      if (!date || !time) {
+        return showMessage('bookMessage', 'Por favor selecciona fecha y hora', 'error');
+      }
+
+      try {
+        const res = await fetch(`${API}/appointments`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ doctor_id: parseInt(doctor_id), date, time, notes })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          return showMessage('bookMessage', data.error, 'error');
+        }
+
+        showMessage('bookMessage', 'Cita agendada exitosamente', 'success');
+        loadAppointments();
+
+      } catch (err) {
+        showMessage('bookMessage', 'Error de conexión', 'error');
+      }
+    }
+
+    // Cargar mis citas
+    async function loadAppointments() {
+      const res = await fetch(`${API}/appointments/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const appointments = await res.json();
+      const list = document.getElementById('appointmentsList');
+
+      if (appointments.length === 0) {
+        list.innerHTML = '<p style="color:#718096">No tienes citas agendadas.</p>';
+        return;
+      }
+
+      list.innerHTML = appointments.map(a => `
+        <div class="appointment-item">
+          <div class="appointment-info">
+            <h4>${a.doctor_name}</h4>
+            <p>${a.specialty} — ${formatDate(a.date)} a las ${a.time.slice(0,5)}</p>
+            ${a.notes ? `<p style="font-style:italic">${a.notes}</p>` : ''}
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.5rem">
+            <span class="status ${a.status}">${a.status === 'scheduled' ? 'Agendada' : 'Cancelada'}</span>
+            ${a.status === 'scheduled' ? `<button class="btn-cancel" onclick="cancelAppointment(${a.id})">Cancelar</button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Cancelar cita
+    async function cancelAppointment(id) {
+      if (!confirm('¿Estás seguro de cancelar esta cita?')) return;
+
+      const res = await fetch(`${API}/appointments/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        loadAppointments();
+      }
+    }
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+    }
+
+    function showMessage(id, text, type) {
+      const msg = document.getElementById(id);
+      msg.textContent = text;
+      msg.className = `message ${type}`;
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+    loadDoctors();
+    loadAppointments();
+  </script>
+</body>
+</html>

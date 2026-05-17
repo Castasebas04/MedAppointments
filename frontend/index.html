@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedAppointments</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f0f4f8; }
+    header { background: #2c5282; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.5rem; }
+    header div { display: flex; align-items: center; gap: 1rem; }
+    header span { font-size: 0.9rem; }
+    button.logout { background: transparent; border: 1px solid white; color: white; padding: 0.4rem 1rem; border-radius: 4px; cursor: pointer; }
+    button.logout:hover { background: rgba(255,255,255,0.1); }
+    .main { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+    h2 { color: #2c5282; margin-bottom: 1rem; }
+    .filters { display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center; }
+    select { padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 1rem; }
+    button.clear { padding: 0.5rem 1rem; background: #718096; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .doctors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .doctor-card { background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .doctor-card h3 { color: #2d3748; margin-bottom: 0.5rem; }
+    .doctor-card .specialty { color: #718096; font-size: 0.9rem; margin-bottom: 1rem; }
+    .doctor-card button { width: 100%; padding: 0.5rem; background: #2c5282; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .doctor-card button:hover { background: #2a4a7f; }
+    .link { color: #2c5282; text-decoration: underline; cursor: pointer; margin-top: 1rem; display: inline-block; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MedAppointments</h1>
+    <div>
+      <span id="userName"></span>
+      <a href="appointments.html" style="color:white; text-decoration:none; border: 1px solid white; padding: 0.4rem 1rem; border-radius: 4px;">Mis citas</a>
+      <button class="logout" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <h2>Doctores disponibles</h2>
+
+    <div class="filters">
+      <select id="specialtyFilter" onchange="filterDoctors()">
+        <option value="">Todas las especialidades</option>
+      </select>
+      <button class="clear" onclick="clearFilter()">Ver todos</button>
+    </div>
+
+    <div class="doctors-grid" id="doctorsGrid">
+      <p>Cargando doctores...</p>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3000';
+
+    // Verificar que el usuario esté logueado
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+    if (!token) {
+      window.location.href = 'login.html';
+    } else {
+      document.getElementById('userName').textContent = `Hola, ${user.name}`;
+    }
+
+    // Cargar especialidades
+    async function loadSpecialties() {
+      const res = await fetch(`${API}/specialties`);
+      const specialties = await res.json();
+      const select = document.getElementById('specialtyFilter');
+      specialties.forEach(s => {
+        const option = document.createElement('option');
+        option.value = s.id;
+        option.textContent = s.name;
+        select.appendChild(option);
+      });
+    }
+
+    // Cargar doctores
+    async function loadDoctors(specialtyId = '') {
+      const url = specialtyId ? `${API}/doctors?specialty_id=${specialtyId}` : `${API}/doctors`;
+      const res = await fetch(url);
+      const doctors = await res.json();
+      const grid = document.getElementById('doctorsGrid');
+
+      if (doctors.length === 0) {
+        grid.innerHTML = '<p>No hay doctores disponibles.</p>';
+        return;
+      }
+
+      grid.innerHTML = doctors.map(d => `
+        <div class="doctor-card">
+          <h3>${d.name}</h3>
+          <p class="specialty">${d.specialty}</p>
+          <button onclick="bookAppointment(${d.id}, '${d.name}')">Agendar cita</button>
+        </div>
+      `).join('');
+    }
+
+    function filterDoctors() {
+      const specialtyId = document.getElementById('specialtyFilter').value;
+      loadDoctors(specialtyId);
+    }
+
+    function clearFilter() {
+      document.getElementById('specialtyFilter').value = '';
+      loadDoctors();
+    }
+
+    function bookAppointment(doctorId, doctorName) {
+      localStorage.setItem('selectedDoctor', JSON.stringify({ id: doctorId, name: doctorName }));
+      window.location.href = 'appointments.html';
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+    loadSpecialties();
+    loadDoctors();
+  </script>
+</body>
+</html>
