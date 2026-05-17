@@ -1,9 +1,13 @@
 const express = require('express');
 const cors = require('cors');
+const doctorRoutes = require('./routes/doctors');
+const specialtyRoutes = require('./routes/specialties');
 require('dotenv').config();
 require('./config/database');
 
 const app = express();
+app.use('/doctors', doctorRoutes);
+app.use('/specialties', specialtyRoutes);
 
 // Middlewares globales
 app.use(cors());
