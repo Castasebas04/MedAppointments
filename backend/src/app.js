@@ -8,6 +8,8 @@ const app = express();
 // Middlewares globales
 app.use(cors());
 app.use(express.json());
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
