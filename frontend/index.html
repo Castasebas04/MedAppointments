@@ -32,23 +32,23 @@
     <h1>MedAppointments</h1>
     <div>
       <span id="userName"></span>
-      <a href="appointments.html" style="color:white; text-decoration:none; border: 1px solid white; padding: 0.4rem 1rem; border-radius: 4px;">Mis citas</a>
-      <button class="logout" onclick="logout()">Cerrar sesión</button>
+      <a href="appointments.html" style="color:white; text-decoration:none; border: 1px solid white; padding: 0.4rem 1rem; border-radius: 4px;">My appointments</a>
+      <button class="logout" onclick="logout()">End session</button>
     </div>
   </header>
 
   <div class="main">
-    <h2>Doctores disponibles</h2>
+    <h2>Available Doctors</h2>
 
     <div class="filters">
       <select id="specialtyFilter" onchange="filterDoctors()">
-        <option value="">Todas las especialidades</option>
+        <option value="">All Specialties</option>
       </select>
-      <button class="clear" onclick="clearFilter()">Ver todos</button>
+      <button class="clear" onclick="clearFilter()">View All</button>
     </div>
 
     <div class="doctors-grid" id="doctorsGrid">
-      <p>Cargando doctores...</p>
+      <p>Loading doctors...</p>
     </div>
   </div>
 
@@ -62,7 +62,7 @@
     if (!token) {
       window.location.href = 'login.html';
     } else {
-      document.getElementById('userName').textContent = `Hola, ${user.name}`;
+      document.getElementById('userName').textContent = `HI, ${user.name}`;
     }
 
     // Cargar especialidades
@@ -86,7 +86,7 @@
       const grid = document.getElementById('doctorsGrid');
 
       if (doctors.length === 0) {
-        grid.innerHTML = '<p>No hay doctores disponibles.</p>';
+        grid.innerHTML = '<p>No available doctors.</p>';
         return;
       }
 
@@ -94,7 +94,7 @@
         <div class="doctor-card">
           <h3>${d.name}</h3>
           <p class="specialty">${d.specialty}</p>
-          <button onclick="bookAppointment(${d.id}, '${d.name}')">Agendar cita</button>
+          <button onclick="bookAppointment(${d.id}, '${d.name}')">Book Appointment</button>
         </div>
       `).join('');
     }
