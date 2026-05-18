@@ -64,7 +64,7 @@ npm run dev
 
 The API will be available at `http://localhost:3000`.
 
-Open `frontend/index.html` with Live Server or any static file server.
+Open `frontend/index.html` with Live Server or any static file server or open this URL 'http://127.0.0.1:5500/medcitas/frontend/login.html'
 
 ## API Endpoints
 
