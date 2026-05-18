@@ -37,8 +37,8 @@
   <header>
     <h1>MedAppointments</h1>
     <div>
-      <a href="index.html" class="btn-outline">Ver doctores</a>
-      <button class="btn-outline" onclick="logout()">Cerrar sesión</button>
+      <a href="index.html" class="btn-outline">See all doctors</a>
+      <button class="btn-outline" onclick="logout()">End session</button>
     </div>
   </header>
 
@@ -46,31 +46,31 @@
 
     <!-- Formulario agendar cita -->
     <div class="card">
-      <h2>Agendar cita</h2>
+      <h2>Book Appointment</h2>
       <div class="form-group">
         <label>Doctor</label>
         <select id="doctorSelect"></select>
       </div>
       <div class="form-group">
-        <label>Fecha</label>
+        <label>Date</label>
         <input type="date" id="appointmentDate">
       </div>
       <div class="form-group">
-        <label>Hora</label>
+        <label>Time</label>
         <input type="time" id="appointmentTime">
       </div>
       <div class="form-group">
-        <label>Notas (opcional)</label>
-        <textarea id="appointmentNotes" placeholder="Describe tu motivo de consulta..."></textarea>
+        <label>Notes (optional)</label>
+        <textarea id="appointmentNotes" placeholder="Describe your reason for the appointment..."></textarea>
       </div>
-      <button class="btn-primary" onclick="bookAppointment()">Agendar cita</button>
+      <button class="btn-primary" onclick="bookAppointment()">Book Appointment</button>
       <div id="bookMessage" class="message"></div>
     </div>
 
     <!-- Lista de citas -->
     <div class="card">
-      <h2>Mis citas</h2>
-      <div id="appointmentsList"><p>Cargando citas...</p></div>
+      <h2>My appointments</h2>
+      <div id="appointmentsList"><p>Loading appointments...</p></div>
     </div>
 
   </div>
@@ -109,7 +109,7 @@
       const notes = document.getElementById('appointmentNotes').value;
 
       if (!date || !time) {
-        return showMessage('bookMessage', 'Por favor selecciona fecha y hora', 'error');
+        return showMessage('bookMessage', 'Please select a date and time', 'error');
       }
 
       try {
@@ -128,11 +128,11 @@
           return showMessage('bookMessage', data.error, 'error');
         }
 
-        showMessage('bookMessage', 'Cita agendada exitosamente', 'success');
+        showMessage('bookMessage', 'Appointment booked successfully', 'success');
         loadAppointments();
 
       } catch (err) {
-        showMessage('bookMessage', 'Error de conexión', 'error');
+        showMessage('bookMessage', 'Connection error', 'error');
       }
     }
 
@@ -153,12 +153,12 @@
         <div class="appointment-item">
           <div class="appointment-info">
             <h4>${a.doctor_name}</h4>
-            <p>${a.specialty} — ${formatDate(a.date)} a las ${a.time.slice(0,5)}</p>
+            <p>${a.specialty} — ${formatDate(a.date)} at ${a.time.slice(0,5)}</p>
             ${a.notes ? `<p style="font-style:italic">${a.notes}</p>` : ''}
           </div>
           <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.5rem">
-            <span class="status ${a.status}">${a.status === 'scheduled' ? 'Agendada' : 'Cancelada'}</span>
-            ${a.status === 'scheduled' ? `<button class="btn-cancel" onclick="cancelAppointment(${a.id})">Cancelar</button>` : ''}
+            <span class="status ${a.status}">${a.status === 'scheduled' ? 'Scheduled' : 'Cancelled'}</span>
+            ${a.status === 'scheduled' ? `<button class="btn-cancel" onclick="cancelAppointment(${a.id})">Cancel</button>` : ''}
           </div>
         </div>
       `).join('');
@@ -166,7 +166,7 @@
 
     // Cancelar cita
     async function cancelAppointment(id) {
-      if (!confirm('¿Estás seguro de cancelar esta cita?')) return;
+      if (!confirm('Are you sure you want to cancel this appointment?')) return;
 
       const res = await fetch(`${API}/appointments/${id}`, {
         method: 'DELETE',
