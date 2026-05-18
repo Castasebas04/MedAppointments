@@ -51,9 +51,13 @@ I basically asked for the specific codelines of git: "git init" "git status" "gi
 
 Other type of prompts were the ones I explained the code the AI gave me in order to check if I did understand completely what it does or how it is called on other files.
 
+"What does meaningful tests means? Give me some ideas for the tests i could present"
+
+The AI started to explain me how tests worked, because I have not do this process on my previous projects, as I always tested directly with the UI. Tha AI just gave me the register and login tests but I add the others as register with an existing email, register without name or other fields and login with a wrong password.
+
 ## 4. Critical Evaluation
 
-One significant piece of AI-generated code was the initial `app.js` file. The AI generated it with the middlewares (`express.json()` and `cors()`) placed AFTER the route definitions. This caused a 500 Internal Server Error when trying to create an appointment because Express processes code top to bottom, but the routes were being executed before the JSON body parser was configured, making `req.body` undefined.
+One significant piece of AI-generated code was the initial `app.js` file. The AI generated it with the middlewares (`express.json()` and `cors()`) placed after the route definitions. This caused a 500 Internal Server Error when trying to create an appointment because Express processes code top to bottom, but the routes were being executed before the JSON body was configured, causing an error.
 
 The AI got the structure right but missed the order dependency. I identified the bug by reading the error message carefully and understanding that Express middleware order matters. I fixed it by moving `app.use(cors())` and `app.use(express.json())` before all route definitions.
 
@@ -61,4 +65,4 @@ This taught me that AI-generated code needs to be read and understood, not just 
 
 ## 5. What I learned
 
-Working on this project helped me understand many important aspects of the backend programming. For example, on my previous projects I always worked with an existing UI, so each change I made on the backend I always tested it directly manual on the frontend, I learned there are extensions that help me test backend without having an UI like Thunder Client. Also I learned about the importance of the order you program the middlewares on the app.js (the brain of the project) and last but not least I keep understanding how to use the AI as a tool to help me understand my projects step by step and also how to communicate my ideas.
+Working on this project helped me understand many important aspects of the backend programming. For example, on my previous projects I always worked with an existing UI, so each change I made on the backend I always tested it directly manual on the frontend, I learned there are extensions that help me test backend without having an existting UI, like Thunder Client. Also I learned about the importance of the order I program the middlewares on the app.js (the brain of the project) and last but not least I keep understanding how to use the AI as a tool to help me understand my projects step by step and also how to communicate my ideas.
