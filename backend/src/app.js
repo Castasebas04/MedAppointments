@@ -5,11 +5,11 @@ require('./config/database');
 
 const app = express();
 
-// Middlewares globales - PRIMERO
+// Middlewares globales
 app.use(cors());
 app.use(express.json());
 
-// Rutas - DESPUÉS
+// Rutas
 const authRoutes = require('./routes/auth');
 const doctorRoutes = require('./routes/doctors');
 const specialtyRoutes = require('./routes/specialties');
