@@ -15,7 +15,6 @@ medcitas/
 │   ├── src/
 │   │   ├── config/        # Database connection and migrations
 │   │   ├── middlewares/   # JWT authentication middleware
-│   │   ├── models/
 │   │   ├── repositories/  # Database queries
 │   │   ├── routes/        # API endpoints
 │   │   ├── services/      # Business logic
@@ -27,6 +26,8 @@ medcitas/
 
 - Node.js v18+
 - A [Neon](https://neon.tech) PostgreSQL database
+
+**Note:** You will need to create a free PostgreSQL database on [Neon](https://neon.tech) and paste the connection string in your `.env` file.The database schema and seed data are included in this repository.
 
 ## Setup
 

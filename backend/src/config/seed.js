@@ -5,11 +5,11 @@ const seed = async () => {
     // Especialidades
     await pool.query(`
       INSERT INTO specialties (name) VALUES
-        ('Odontologia'),
-        ('Oftalmologia'),
-        ('Dermatologia'),
-        ('Cardiologia'),
-        ('Pediatría')
+        ('Dentistry'),
+        ('Ophthalmology'),
+        ('Dermatology'),
+        ('Cardiology'),
+        ('Pediatrics')
       ON CONFLICT (name) DO NOTHING
     `);
 
